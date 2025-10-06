@@ -22,11 +22,10 @@ you are done with your submission.
 We looked at home sales in Ames and found that most houses sell for
 between \$150,000 and \$300,000, but there are some really expensive
 ones that push the average way up. The bigger the house, the more it
-tends to cost, which makes sense. We also noticed some weird stuff -
-like a bunch of homes that sold for \$0 (probably typos or family
-transfers) and some small houses that sold for a lot (probably because
-they’re in nice areas). Where a house is located in Ames really matters
-for the price too.
+tends to cost, which makes sense. We also noticed how a bunch of homes
+that sold for \$0 (probably typos or family transfers) and some small
+houses that sold for a lot (probably because they’re in nice areas).
+Where a house is located in Ames really matters for the price too.
 
 ## Data Overview
 
@@ -144,7 +143,12 @@ around which homes were sold multiple times, the construction years, and
 basement sizes. But what’s clear is that most properties are regular
 single-family homes in that sweet spot of 1,000-2,000 square feet.
 
-## Step 2: Main Variable - Sale Price
+## Step 2: Main Variable: Sale Price
+
+This report focuses on Sale Price as the primary variable of interest,
+examining its relationships with other variables in the dataset.
+
+## Step 3: Exploration of the Main Variable
 
 ``` r
 price_summary <- ames %>%
@@ -195,67 +199,23 @@ We found homes that sold for \$0, which seems off, probably data errors
 or family transfers. One house sold for \$20.5 million, which really
 skews the numbers.
 
-## Step 3: Relationship with Total Living Area
-
-``` r
-# Create cleaned dataset for analysis
-ames_clean <- ames %>%
-  filter(
-    !is.na(sale_price), sale_price > 0,
-    !is.na(total_living_area_sf), total_living_area_sf > 0,
-    total_living_area_sf < 10000  # Remove extreme outliers
-  )
-
-cat("After cleaning:", nrow(ames_clean), "observations remain\n")
-```
-
-    ## After cleaning: 4288 observations remain
-
-``` r
-# Distribution of living area
-p1 <- ggplot(ames_clean, aes(x = total_living_area_sf)) +
-  geom_histogram(binwidth = 250, fill = "darkred", alpha = 0.7) +
-  labs(title = "Distribution of Total Living Area",
-       x = "Living Area (sq ft)", y = "Count") +
-  theme_minimal()
-
-# Relationship with price
-p2 <- ggplot(ames_clean, aes(x = total_living_area_sf, y = sale_price)) +
-  geom_point(alpha = 0.5, color = "darkred") +
-  geom_smooth(method = "lm", color = "gold", se = TRUE) +
-  labs(title = "Sale Price vs. Living Area",
-       x = "Total Living Area (sq ft)", 
-       y = "Sale Price (USD)") +
-  scale_y_continuous(labels = scales::dollar) +
-  theme_minimal()
-
-p1 + p2
-```
-
-![](README_files/figure-gfm/living-area-analysis-1.png)<!-- -->
-
-``` r
-correlation <- cor(ames_clean$total_living_area_sf, ames_clean$sale_price, 
-                   use = "complete.obs")
-cat("Correlation between living area and sale price:", round(correlation, 3), "\n")
-```
-
-    ## Correlation between living area and sale price: -0.209
-
-**Key Findings**: We found that there’s a strong correlation between
-living area and price. Most Ames homes fall in the 800-2,500 sq ft
-range, and generally, more space means higher price. But it’s not
-perfect as the relationship gets messier with expensive homes, and some
-smaller houses sell for more money than expected, likely due to what the
-location has to offer or the property’s features.
-
 ## Step 4: Individual Investigations
 
-### Maurycy:
+### Maurycy: Neighborhood Impact on Sale Prices
 
 I decided to look at neighborhoods because I was curious about how much
 location really matters for home prices. Would it actually make that big
 of a difference if you’re on one side of town versus another?
+
+``` r
+# Create cleaned dataset for neighborhood analysis
+ames_clean <- ames %>%
+  filter(
+    !is.na(sale_price), 
+    sale_price > 0,
+    !is.na(neighborhood)
+  )
+```
 
 ``` r
 # Calculate neighborhood statistics
@@ -304,11 +264,11 @@ head(neighborhood_stats, 5) %>%
     ## # A tibble: 5 × 3
     ##   neighborhood              median_price count
     ##   <fct>                            <dbl> <int>
-    ## 1 (57) Res: Investor Owned     14200000    417
-    ## 2 (20) Res: Northridge           390000     88
-    ## 3 (19) Res: North Ridge Hei      389500    215
-    ## 4 (38) Res: Hayden Lake          366212.   106
-    ## 5 (21) Res: Veenker              327000     32
+    ## 1 (57) Res: Investor Owned      14200000   417
+    ## 2 (0) None                        525000    61
+    ## 3 (20) Res: Northridge            390000    90
+    ## 4 (19) Res: North Ridge Hei       351379   317
+    ## 5 (21) Res: Veenker               327000    32
 
 ``` r
 cat("\nBottom 5 Least Expensive Neighborhoods:\n")
@@ -327,15 +287,16 @@ tail(neighborhood_stats, 5) %>%
     ##   neighborhood             median_price count
     ##   <fct>                           <dbl> <int>
     ## 1 (48) Res: Landmark Villa       135000    39
-    ## 2 (39) Res: Briardale            132000    31
+    ## 2 (39) Res: Briardale            132000    33
     ## 3 (42) Res: Meadow Village       120125    48
-    ## 4 (55) Res: Dakota Ridge         113675    27
+    ## 4 (55) Res: Dakota Ridge         110750    42
     ## 5 (53) Res: Willow Creek 1        99500    15
 
-**Findings (Maurycy)**: Location really is everything in Ames real
-estate. The data shows a clear divide as premium areas like Northridge
-Heights and Somerset have median prices above \$400,000, while more
-affordable spots like Old Town and Mitchell come in under \$150,000.
-This neighborhood effect is so strong that it can make a small house in
-a good area worth more than a big house in a less desirable one. The zip
-code might be more important than the square footage.
+**Key Findings (Maurycy)**: Location really is everything in Ames real
+estate. The data shows a clear divide as premium areas like Veenker and
+Northridge Heights have median prices above \$300,000, while more
+affordable spots like Briardale and Meadow Village come in under
+\$150,000. This neighborhood effect is so strong that it can make a
+small house in a good area worth more than a big house in a less
+desirable one. The zip code might be more important than the square
+footage.

@@ -19,7 +19,7 @@ Submit a link to your repository on Canvas (only one submission per team) to sig
 
 ## TL;DR
 
-We looked at home sales in Ames and found that most houses sell for between $150,000 and $300,000, but there are some really expensive ones that push the average way up. The bigger the house, the more it tends to cost, which makes sense. We also noticed some weird stuff - like a bunch of homes that sold for $0 (probably typos or family transfers) and some small houses that sold for a lot (probably because they're in nice areas). Where a house is located in Ames really matters for the price too.
+We looked at home sales in Ames and found that most houses sell for between $150,000 and $300,000, but there are some really expensive ones that push the average way up. The bigger the house, the more it tends to cost, which makes sense. We also noticed how a bunch of homes that sold for $0 (probably typos or family transfers) and some small houses that sold for a lot (probably because they're in nice areas). Where a house is located in Ames really matters for the price too.
 
 ## Data Overview
 
@@ -63,8 +63,10 @@ ames %>%
 **Initial Observations**:
 Looking through the data, we found homes at every price point, from free ($0 sales) to luxury mansions over $20 million. The dataset isn't perfect though as there are gaps, especially around which homes were sold multiple times, the construction years, and basement sizes. But what's clear is that most properties are regular single-family homes in that sweet spot of 1,000-2,000 square feet.
 
-## Step 2: Main Variable - Sale Price 
+## Step 2: Main Variable: Sale Price
+This report focuses on Sale Price as the primary variable of interest, examining its relationships with other variables in the dataset.
 
+## Step 3: Exploration of the Main Variable
 ```{r sale-price-basic}
 price_summary <- ames %>%
   summarise(
@@ -103,54 +105,20 @@ p1 + p2
 **Key Findings**:
 Looking at the sale prices, most homes are pretty affordable, with the typical house going for around \$170,900. But there are some expensive properties that push the average up over \$1 million. We found homes that sold for \$0, which seems off, probably data errors or family transfers. One house sold for \$20.5 million, which really skews the numbers.
 
-## Step 3: Relationship with Total Living Area
-
-```{r data-cleaning}
-# Create cleaned dataset for analysis
-ames_clean <- ames %>%
-  filter(
-    !is.na(sale_price), sale_price > 0,
-    !is.na(total_living_area_sf), total_living_area_sf > 0,
-    total_living_area_sf < 10000  # Remove extreme outliers
-  )
-
-cat("After cleaning:", nrow(ames_clean), "observations remain\n")
-```
-
-```{r living-area-analysis, fig.width=12, fig.height=5}
-# Distribution of living area
-p1 <- ggplot(ames_clean, aes(x = total_living_area_sf)) +
-  geom_histogram(binwidth = 250, fill = "darkred", alpha = 0.7) +
-  labs(title = "Distribution of Total Living Area",
-       x = "Living Area (sq ft)", y = "Count") +
-  theme_minimal()
-
-# Relationship with price
-p2 <- ggplot(ames_clean, aes(x = total_living_area_sf, y = sale_price)) +
-  geom_point(alpha = 0.5, color = "darkred") +
-  geom_smooth(method = "lm", color = "gold", se = TRUE) +
-  labs(title = "Sale Price vs. Living Area",
-       x = "Total Living Area (sq ft)", 
-       y = "Sale Price (USD)") +
-  scale_y_continuous(labels = scales::dollar) +
-  theme_minimal()
-
-p1 + p2
-```
-
-```{r correlation}
-correlation <- cor(ames_clean$total_living_area_sf, ames_clean$sale_price, 
-                   use = "complete.obs")
-cat("Correlation between living area and sale price:", round(correlation, 3), "\n")
-```
-
-**Key Findings**:
-We found that there's a strong correlation between living area and price. Most Ames homes fall in the 800-2,500 sq ft range, and generally, more space means higher price. But it's not perfect as the relationship gets messier with expensive homes, and some smaller houses sell for more money than expected, likely due to what the location has to offer or the property's features.
-
 ## Step 4: Individual Investigations
 
-### Maurycy:
+### Maurycy: Neighborhood Impact on Sale Prices
 I decided to look at neighborhoods because I was curious about how much location really matters for home prices. Would it actually make that big of a difference if you're on one side of town versus another?
+
+```{r data-cleaning-for-neighborhood}
+# Create cleaned dataset for neighborhood analysis
+ames_clean <- ames %>%
+  filter(
+    !is.na(sale_price), 
+    sale_price > 0,
+    !is.na(neighborhood)
+  )
+```
 
 ```{r neighborhood-analysis, fig.height=8}
 # Calculate neighborhood statistics
@@ -194,5 +162,5 @@ tail(neighborhood_stats, 5) %>%
   print()
 ```
 
-**Findings (Maurycy)**: 
-Location really is everything in Ames real estate. The data shows a clear divide as premium areas like Northridge Heights and Somerset have median prices above \$400,000, while more affordable spots like Old Town and Mitchell come in under \$150,000. This neighborhood effect is so strong that it can make a small house in a good area worth more than a big house in a less desirable one. The zip code might be more important than the square footage.
+**Key Findings (Maurycy)**: 
+Location really is everything in Ames real estate. The data shows a clear divide as premium areas like Veenker and Northridge Heights have median prices above \$300,000, while more affordable spots like Briardale and Meadow Village come in under \$150,000. This neighborhood effect is so strong that it can make a small house in a good area worth more than a big house in a less desirable one. The zip code might be more important than the square footage.
