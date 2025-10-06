@@ -189,11 +189,11 @@ p1 + p2
 ![](README_files/figure-gfm/sale-price-visuals-1.png)<!-- -->
 
 **Key Findings**: Looking at the sale prices, most homes are pretty
-affordable, with the typical house going for around 170,900 dollars. But
-there are some expensive properties that push the average up over 1
-million dollars. We found homes that sold for 0 dollars, which seems
-off, probably data errors or family transfers. One house sold for 20.5
-million dollars, which really skews the numbers.
+affordable, with the typical house going for around \$170,900. But there
+are some expensive properties that push the average up over \$1 million.
+We found homes that sold for \$0, which seems off, probably data errors
+or family transfers. One house sold for \$20.5 million, which really
+skews the numbers.
 
 ## Step 3: Relationship with Total Living Area
 

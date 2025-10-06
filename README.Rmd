@@ -101,7 +101,7 @@ p1 + p2
 ```
 
 **Key Findings**:
-Looking at the sale prices, most homes are pretty affordable, with the typical house going for around 170,900 dollars. But there are some expensive properties that push the average up over 1 million dollars. We found homes that sold for 0 dollars, which seems off, probably data errors or family transfers. One house sold for 20.5 million dollars, which really skews the numbers.
+Looking at the sale prices, most homes are pretty affordable, with the typical house going for around \$170,900. But there are some expensive properties that push the average up over \$1 million. We found homes that sold for \$0, which seems off, probably data errors or family transfers. One house sold for \$20.5 million, which really skews the numbers.
 
 ## Step 3: Relationship with Total Living Area
 
@@ -195,4 +195,4 @@ tail(neighborhood_stats, 5) %>%
 ```
 
 **Findings (Maurycy)**: 
-Location really is everything in Ames real estate. The data shows a clear divide as premium areas like Northridge Heights and Somerset have median prices above $400,000, while more affordable spots like Old Town and Mitchell come in under $150,000. This neighborhood effect is so strong that it can make a small house in a good area worth more than a big house in a less desirable one. The zip code might be more important than the square footage.
+Location really is everything in Ames real estate. The data shows a clear divide as premium areas like Northridge Heights and Somerset have median prices above \$400,000, while more affordable spots like Old Town and Mitchell come in under \$150,000. This neighborhood effect is so strong that it can make a small house in a good area worth more than a big house in a less desirable one. The zip code might be more important than the square footage.
