@@ -4,9 +4,8 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit the README.Rmd file -->
 
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 # Lab report #1
@@ -17,3 +16,183 @@ Include your answers in this document (Rmd file). Make sure that it knits proper
 
 All submissions to the github repo will be automatically uploaded for grading once the due date is passed.
 Submit a link to your repository on Canvas (only one submission per team) to signal to the instructors that you are done with your submission.
+
+## TL;DR
+
+We looked at home sales in Ames and found that most houses sell for between $150,000 and $300,000, but there are some really expensive ones that push the average way up. The bigger the house, the more it tends to cost, which makes sense. We also noticed some weird stuff - like a bunch of homes that sold for $0 (probably typos or family transfers) and some small houses that sold for a lot (probably because they're in nice areas). Where a house is located in Ames really matters for the price too.
+
+## Data Overview
+
+```{r load-packages}
+library(tidyverse)
+library(classdata)
+library(janitor)
+```
+
+```{r load-data}
+data("ames")
+ames <- janitor::clean_names(ames)
+
+# Initial data inspection
+glimpse(ames)
+```
+
+```{r data-summary}
+cat("Dataset dimensions:", dim(ames)[1], "rows ×", dim(ames)[2], "columns\n")
+cat("Date range:", as.character(range(ames$sale_date, na.rm = TRUE)), "\n")
+```
+
+Interpretation: The dataset has almost 7,000 home sales with 16 different pieces of information about each one. The main things we're looking at are the sale price, how big the house is, when it was built, and where it's located. Some things like air conditioning and fireplaces are just yes/no, while the prices and sizes are numbers. The prices vary, ranging from $0 all the way up to several millions.
+
+## Step 1: Data Inspection and Cleaning
+
+```{r initial-inspection}
+# Check for missing values
+missing_summary <- map_dbl(ames, ~sum(is.na(.))) %>% 
+  tibble(variable = names(.), missing_count = .) %>%
+  arrange(desc(missing_count))
+
+print(missing_summary)
+
+# Basic statistics for numerical variables
+ames %>% 
+  select(where(is.numeric)) %>% 
+  summary()
+```
+
+**Initial Observations**:
+Looking through the data, we found homes at every price point, from free ($0 sales) to luxury mansions over $20 million. The dataset isn't perfect though as there are gaps, especially around which homes were sold multiple times, the construction years, and basement sizes. But what's clear is that most properties are regular single-family homes in that sweet spot of 1,000-2,000 square feet.
+
+## Step 2: Main Variable - Sale Price 
+
+```{r sale-price-basic}
+price_summary <- ames %>%
+  summarise(
+    Mean = mean(sale_price, na.rm = TRUE),
+    Median = median(sale_price, na.rm = TRUE),
+    SD = sd(sale_price, na.rm = TRUE),
+    Min = min(sale_price, na.rm = TRUE),
+    Max = max(sale_price, na.rm = TRUE),
+    Zero_Count = sum(sale_price == 0, na.rm = TRUE)
+  )
+
+print(price_summary)
+```
+
+```{r sale-price-visuals, fig.width=10, fig.height=6}
+# Create a combined visualization
+p1 <- ggplot(ames, aes(x = sale_price)) +
+  geom_histogram(binwidth = 50000, fill = "darkred", alpha = 0.8) +
+  labs(title = "A. Distribution of Sale Prices",
+       x = "Sale Price (USD)", y = "Count") +
+  scale_x_continuous(labels = scales::dollar) +
+  theme_minimal()
+
+p2 <- ggplot(ames, aes(y = sale_price)) +
+  geom_boxplot(fill = "darkred", alpha = 0.7) +
+  labs(title = "B. Boxplot of Sale Prices",
+       y = "Sale Price (USD)") +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_minimal()
+
+# Combine plots
+library(patchwork)
+p1 + p2
+```
+
+**Key Findings**:
+Looking at the sale prices, most homes are pretty affordable, with the typical house going for around 170,900 dollars. But there are some expensive properties that push the average up over 1 million dollars. We found homes that sold for 0 dollars, which seems off, probably data errors or family transfers. One house sold for 20.5 million dollars, which really skews the numbers.
+
+## Step 3: Relationship with Total Living Area
+
+```{r data-cleaning}
+# Create cleaned dataset for analysis
+ames_clean <- ames %>%
+  filter(
+    !is.na(sale_price), sale_price > 0,
+    !is.na(total_living_area_sf), total_living_area_sf > 0,
+    total_living_area_sf < 10000  # Remove extreme outliers
+  )
+
+cat("After cleaning:", nrow(ames_clean), "observations remain\n")
+```
+
+```{r living-area-analysis, fig.width=12, fig.height=5}
+# Distribution of living area
+p1 <- ggplot(ames_clean, aes(x = total_living_area_sf)) +
+  geom_histogram(binwidth = 250, fill = "darkred", alpha = 0.7) +
+  labs(title = "Distribution of Total Living Area",
+       x = "Living Area (sq ft)", y = "Count") +
+  theme_minimal()
+
+# Relationship with price
+p2 <- ggplot(ames_clean, aes(x = total_living_area_sf, y = sale_price)) +
+  geom_point(alpha = 0.5, color = "darkred") +
+  geom_smooth(method = "lm", color = "gold", se = TRUE) +
+  labs(title = "Sale Price vs. Living Area",
+       x = "Total Living Area (sq ft)", 
+       y = "Sale Price (USD)") +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_minimal()
+
+p1 + p2
+```
+
+```{r correlation}
+correlation <- cor(ames_clean$total_living_area_sf, ames_clean$sale_price, 
+                   use = "complete.obs")
+cat("Correlation between living area and sale price:", round(correlation, 3), "\n")
+```
+
+**Key Findings**:
+We found that there's a strong correlation between living area and price. Most Ames homes fall in the 800-2,500 sq ft range, and generally, more space means higher price. But it's not perfect as the relationship gets messier with expensive homes, and some smaller houses sell for more money than expected, likely due to what the location has to offer or the property's features.
+
+## Step 4: Individual Investigations
+
+### Maurycy:
+I decided to look at neighborhoods because I was curious about how much location really matters for home prices. Would it actually make that big of a difference if you're on one side of town versus another?
+
+```{r neighborhood-analysis, fig.height=8}
+# Calculate neighborhood statistics
+neighborhood_stats <- ames_clean %>%
+  group_by(neighborhood) %>%
+  summarise(
+    median_price = median(sale_price),
+    mean_price = mean(sale_price),
+    count = n(),
+    .groups = 'drop'
+  ) %>%
+  filter(count >= 10) %>%  # Only neighborhoods with sufficient data
+  arrange(desc(median_price))
+
+# Create visualization
+ggplot(neighborhood_stats, 
+       aes(x = reorder(neighborhood, median_price), y = median_price)) +
+  geom_col(fill = "darkred", alpha = 0.8) +
+  coord_flip() +
+  labs(
+    title = "Median Sale Price by Neighborhood",
+    subtitle = "Neighborhoods with 10+ sales",
+    x = NULL,
+    y = "Median Sale Price (USD)"
+  ) +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 8))
+```
+
+```{r neighborhood-detail}
+# Show top and bottom neighborhoods
+cat("Top 5 Most Expensive Neighborhoods:\n")
+head(neighborhood_stats, 5) %>% 
+  select(neighborhood, median_price, count) %>%
+  print()
+
+cat("\nBottom 5 Least Expensive Neighborhoods:\n")
+tail(neighborhood_stats, 5) %>% 
+  select(neighborhood, median_price, count) %>%
+  print()
+```
+
+**Findings (Maurycy)**: 
+Location really is everything in Ames real estate. The data shows a clear divide as premium areas like Northridge Heights and Somerset have median prices above $400,000, while more affordable spots like Old Town and Mitchell come in under $150,000. This neighborhood effect is so strong that it can make a small house in a good area worth more than a big house in a less desirable one. The zip code might be more important than the square footage.
