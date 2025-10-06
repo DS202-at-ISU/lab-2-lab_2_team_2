@@ -27,13 +27,13 @@ that sold for \$0 (probably typos or family transfers) and some small
 houses that sold for a lot (probably because they’re in nice areas).
 Where a house is located in Ames really matters for the price too.
 
-## Data Overview
-
 ``` r
 library(tidyverse)
 library(classdata)
 library(janitor)
 ```
+
+## Step 1: Data Inspection and Cleaning
 
 ``` r
 data("ames")
@@ -73,15 +73,6 @@ cat("Date range:", as.character(range(ames$sale_date, na.rm = TRUE)), "\n")
 ```
 
     ## Date range: 2017-07-03 2022-08-31
-
-Interpretation: The dataset has almost 7,000 home sales with 16
-different pieces of information about each one. The main things we’re
-looking at are the sale price, how big the house is, when it was built,
-and where it’s located. Some things like air conditioning and fireplaces
-are just yes/no, while the prices and sizes are numbers. The prices
-vary, ranging from \$0 all the way up to several millions.
-
-## Step 1: Data Inspection and Cleaning
 
 ``` r
 # Check for missing values
@@ -136,12 +127,16 @@ ames %>%
     ##  Max.   :10.000   Max.   :6496.0        Max.   :523228  
     ##  NA's   :447      NA's   :2682          NA's   :89
 
-**Initial Observations**: Looking through the data, we found homes at
-every price point, from free (\$0 sales) to luxury mansions over \$20
-million. The dataset isn’t perfect though as there are gaps, especially
-around which homes were sold multiple times, the construction years, and
-basement sizes. But what’s clear is that most properties are regular
-single-family homes in that sweet spot of 1,000-2,000 square feet.
+**Key Findings**: The dataset includes nearly 7,000 home sales with 16
+variables, spanning July 3, 2017 to August 31, 2022. The main things
+we’re looking at are the sale price, how big the house is, when it was
+built, and where it’s located. Some things like air conditioning and
+fireplaces are just yes/no, while the prices and sizes are numbers. The
+prices vary, ranging from \$0 all the way up to several millions.The
+dataset isn’t perfect though as there are gaps, especially around which
+homes were sold multiple times, the construction years, and basement
+sizes. But what’s clear is that most properties are regular
+single-family homes ranging in 1,000-2,000 square feet.
 
 ## Step 2: Main Variable: Sale Price
 
