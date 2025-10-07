@@ -58,6 +58,7 @@ ames %>%
 
 **Key Findings**:
 The dataset includes nearly 7,000 home sales with 16 variables, spanning July 3, 2017 to August 31, 2022. The main things we're looking at are the sale price, how big the house is, when it was built, and where it's located. Some things like air conditioning and fireplaces are just yes/no, while the prices and sizes are numbers. The prices vary, ranging from \$0 all the way up to several millions.The dataset isn't perfect though as there are gaps, especially around which homes were sold multiple times, the construction years, and basement sizes. But what's clear is that most properties are regular single-family homes ranging in 1,000-2,000 square feet.
+It was interesting to see how much the housing market in Ames can vary, even within a small area. These differences make it clear that both location and home features play major roles in determining price. Overall, this dataset gives a realistic look into how diverse housing trends can be, even in one city.
 
 ## Step 2: Main Variable: Sale Price
 This report focuses on Sale Price as the primary variable of interest, examining its relationships with other variables in the dataset.
