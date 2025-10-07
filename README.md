@@ -197,7 +197,10 @@ affordable, with the typical house going for around \$170,900. But there
 are some expensive properties that push the average up over \$1 million.
 We found homes that sold for \$0, which seems off, probably data errors
 or family transfers. One house sold for \$20.5 million, which really
-skews the numbers.
+skews the numbers.This shows that whole most homes in Ames fall within a
+reasonable price range, a few extreme outliers have a big impact on the
+overall averages. It also highlights why looking at both the mean and
+mediaan is important when analyzing data with large variations.
 
 ## Step 4: Individual Investigations
 
@@ -300,3 +303,115 @@ affordable spots like Briardale and Meadow Village come in under
 small house in a good area worth more than a big house in a less
 desirable one. The zip code might be more important than the square
 footage.
+
+### Maya: Relationship between Sale Price and Year Built
+
+I decided to look at and explore whether newer homes tend to sell for
+more money in Ames or if older homes do due to Ames being a college
+town. I expected to see that houses built in recent decades have higher
+prices because of updated designs, materials, locations, and features.
+
+``` r
+#cleaned dataset for analysis
+ames_year <- ames %>%
+  filter(sale_price > 0, !is.na(year_built))
+```
+
+``` r
+#group by decade to get clearer summary
+ames_decade <- ames_year %>%
+  mutate(decade = (year_built %/% 10) * 10) %>%
+  group_by(decade) %>%
+  summarise(
+    median_price = median(sale_price),
+    mean_price = mean(sale_price),
+    count = n(),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(median_price))
+
+cat("Top 5 Most Expensive Decades:\n")
+```
+
+    ## Top 5 Most Expensive Decades:
+
+``` r
+head(ames_decade, 5) %>%
+  select(decade, median_price, count) %>%
+  print()
+```
+
+    ## # A tibble: 5 × 3
+    ##   decade median_price count
+    ##    <dbl>        <dbl> <int>
+    ## 1   2000       372500   832
+    ## 2   2010       330000   517
+    ## 3   1990       281620   478
+    ## 4   2020       256500   298
+    ## 5   1980       225000   234
+
+``` r
+cat("\nBottom 5 Least Expensive Decades:\n")
+```
+
+    ## 
+    ## Bottom 5 Least Expensive Decades:
+
+``` r
+tail(ames_decade, 5) %>%
+  select(decade, median_price, count) %>%
+  print()
+```
+
+    ## # A tibble: 5 × 3
+    ##   decade median_price count
+    ##    <dbl>        <dbl> <int>
+    ## 1   1910       178500   133
+    ## 2   1920       176425   238
+    ## 3   1900       170900    61
+    ## 4   1890       167250    22
+    ## 5   1880       159000     8
+
+``` r
+ggplot(ames_decade, aes(x = factor(decade), y = median_price)) +
+  geom_col(fill = "orange", alpha = 0.8) +
+  labs(
+    title = "Median Sale Price by Decade Built",
+    x = "Decade Built",
+    y = "Median Sale Price (USD)"
+  ) +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_minimal()
+```
+
+![](README_files/figure-gfm/visualization-comparison-1.png)<!-- -->
+
+``` r
+ggplot(ames_year, aes(x = year_built, y = sale_price)) +
+  geom_point(alpha = 0.4, color = "darkblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(
+    title = "Relationship Between Sale Price and Year Built (Scatterplot)",
+    x = "Year Built",
+    y = "Sale Price (USD)"
+  ) +
+  scale_y_continuous(labels = scales::dollar, limits = c(0, 800000)) +
+  theme_minimal()
+```
+
+![](README_files/figure-gfm/maya-yearbuilt-scatter-1.png)<!-- -->
+
+**Key Findings (Maya)**: Looking at the data, newer homes in Ames
+generally sell for higher prices than older ones. The decade bar chart
+shows that homes built after 1990 have much higher median sale prices,
+with the 2000s standing out as the most expensive decade. Homes built
+before 1950, on the other hand, had much lower sale prices overall. The
+scatterplot also supports this trend, showing a clear upward
+relationship between the year a home was built and its sale price. As
+the years increase, prices tend to rise, which makes sense because newer
+homes usually come with modern features, better materials, and more
+energy-efficient designs. Even though a few older homes still sold for
+high prices, they were likely renovated or located in more desirable
+neighborhoods. Overall, this analysis shows how a home’s construction
+year plays a major role in its value, but it also reminded me that
+location and quality can sometimes outweigh age when it comes to price.
