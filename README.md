@@ -136,7 +136,12 @@ prices vary, ranging from \$0 all the way up to several millions.The
 dataset isn’t perfect though as there are gaps, especially around which
 homes were sold multiple times, the construction years, and basement
 sizes. But what’s clear is that most properties are regular
-single-family homes ranging in 1,000-2,000 square feet.
+single-family homes ranging in 1,000-2,000 square feet. It was
+interesting to see how much the housing market in Ames can vary, even
+within a small area. These differences make it clear that both location
+and home features play major roles in determining price. Overall, this
+dataset gives a realistic look into how diverse housing trends can be,
+even in one city.
 
 ## Step 2: Main Variable: Sale Price
 

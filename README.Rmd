@@ -100,7 +100,7 @@ p1 + p2
 ```
 
 **Key Findings**:
-Looking at the sale prices, most homes are pretty affordable, with the typical house going for around \$170,900. But there are some expensive properties that push the average up over \$1 million. We found homes that sold for \$0, which seems off, probably data errors or family transfers. One house sold for \$20.5 million, which really skews the numbers.
+Looking at the sale prices, most homes are pretty affordable, with the typical house going for around \$170,900. But there are some expensive properties that push the average up over \$1 million. We found homes that sold for \$0, which seems off, probably data errors or family transfers. One house sold for \$20.5 million, which really skews the numbers.This shows that whole most homes in Ames fall within a reasonable price range, a few extreme outliers have a big impact on the overall averages. It also highlights why looking at both the mean and mediaan is important when analyzing data with large variations.
 
 ## Step 4: Individual Investigations
 
